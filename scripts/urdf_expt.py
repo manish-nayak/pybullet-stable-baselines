@@ -1,6 +1,8 @@
 import pybullet as p
 import time
 import pybullet_data
+import os
+
 physicsClient = p.connect(p.GUI)#or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
 p.setGravity(0,0,-10)
@@ -13,7 +15,7 @@ startOrientation = p.getQuaternionFromEuler([0,0,0])
 #boxId = p.loadURDF("urdf/ackermann_steering.urdf",startPos, startOrientation)
 #boxId = p.loadURDF("urdf/ackermann_xacro_output.urdf",startPos, startOrientation)
 
-boxId = p.loadURDF("../urdf/r2d2.urdf",startPos, startOrientation)
+boxId = p.loadURDF(os.path.join(os.path.dirname(__file__),"../urdf/r2d2.urdf"),startPos, startOrientation)
 
 #set the center of mass frame (loadURDF sets base link frame) startPos/Ornp.resetBasePositionAndOrientation(boxId, startPos, startOrientation)
 for i in range (10000):

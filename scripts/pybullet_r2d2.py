@@ -1,6 +1,8 @@
 import pybullet as p
 import time
 import pybullet_data
+import os
+
 physicsClient = p.connect(p.GUI)#or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
 p.setGravity(0,0,-10)
@@ -8,7 +10,7 @@ planeId = p.loadURDF("plane.urdf")
 startPos = [0,0,1]
 startOrientation = p.getQuaternionFromEuler([0,0,0])
 
-objUid = p.loadURDF("../urdf/r2d2.urdf",startPos, startOrientation)
+objUid = p.loadURDF(os.path.join(os.path.dirname(__file__),"../urdf/r2d2.urdf"),startPos, startOrientation)
 jointIndex = 5
 
 numJoint = p.getNumJoints(objUid)
