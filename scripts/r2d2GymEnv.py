@@ -25,12 +25,12 @@ class r2d2GymEnv(gym.Env):
 
   def __init__(self,
                urdfRoot=pybullet_data.getDataPath(),
-               actionRepeat=1,
+               actionRepeat=50,
                isEnableSelfCollision=True,
                isDiscrete=False,
                renders=False):
     print("init")
-    self._timeStep = 1/240
+    self._timeStep = 0.01
     self._urdfRoot = urdfRoot
     self._actionRepeat = actionRepeat
     self._isEnableSelfCollision = isEnableSelfCollision
@@ -39,6 +39,9 @@ class r2d2GymEnv(gym.Env):
     self._envStepCounter = 0
     self._renders = renders
     self._isDiscrete = isDiscrete
+    self._cam_dist = 4
+    self._cam_yaw = 50
+    self._cam_pitch = -35
     if self._renders:
       self._p = bc.BulletClient(connection_mode=pybullet.GUI)
     else:
@@ -58,7 +61,7 @@ class r2d2GymEnv(gym.Env):
       self._action_bound = 1
       action_high = np.array([self._action_bound] * action_dim)
       self.action_space = spaces.Box(-action_high, action_high, dtype=np.float32)
-    self.observation_space = spaces.Box(-observation_high, observation_high, dtype=np.float32)
+    self.observation_space = spaces.Box(-observation_high, observation_high, dtype=float)
     self.viewer = None
 
   def reset(self):
@@ -106,6 +109,7 @@ class r2d2GymEnv(gym.Env):
     ballPosInRobot, ballOrnInRobot = self._p.multiplyTransforms(invRobotPos, invRobotOrn, ballPos, ballOrn)
 
     self._observation.extend([ballPosInRobot[0], ballPosInRobot[1]])
+    # print(self._observation, type(ballPosInRobot[0]))
     return self._observation
 
   def step(self, action):
@@ -162,7 +166,10 @@ class r2d2GymEnv(gym.Env):
     return rgb_array
 
   def _termination(self):
-    return self._envStepCounter > 1000
+    closestPoints = self._p.getClosestPoints(self._robot.robotUniqueId, self._ballUniqueId,
+                                             10000)
+    min_dist = closestPoints[0][8]                                        
+    return self._envStepCounter > 10000 or min_dist < 0.1
 
   def _reward(self):
     closestPoints = self._p.getClosestPoints(self._robot.robotUniqueId, self._ballUniqueId,

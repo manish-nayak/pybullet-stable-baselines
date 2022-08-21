@@ -17,7 +17,7 @@ class R2D2:
     # robot = self._p.loadURDF(os.path.join(self.urdfRootPath, "r2d2.urdf"),
     #                        [0, 0, .5],
     #                        useFixedBase=False)
-    robot = self._p.loadURDF(os.path.join(os.path.dirname(__file__),"../urdf/r2d2.urdf"),
+    robot = self._p.loadURDF(os.path.join(os.path.dirname(__file__),"../urdf/r2d2_modified.urdf"),
                            [0, 0, .5],
                            useFixedBase=False)
                            
@@ -49,10 +49,10 @@ class R2D2:
 
     self.rightWheels = [right_front_wheeel, right_back_wheel]
     self.leftWheels = [left_front_wheel, left_back_wheel]
-    self.maxForce = 500
+    self.maxForce = 350
     self.nMotors = 2 #4 Total
-    self.speedMultiplierRight = 50.
-    self.speedMultiplierLeft = 50.0/2
+    self.speedMultiplierRight = 40.
+    self.speedMultiplierLeft = 40.0
 
   def getActionDimension(self):
     return self.nMotors
@@ -72,9 +72,9 @@ class R2D2:
   def applyAction(self, motorCommands):
     targetVelocityRight = motorCommands[0] * self.speedMultiplierRight
     targetVelocityLeft = motorCommands[1] * self.speedMultiplierLeft
-    for i in range(self._p.getNumJoints(self.robotUniqueId)):
-      print(self._p.getJointInfo(self.robotUniqueId,i))
-      print(self._p.getJointState(self.robotUniqueId,i))
+    # for i in range(self._p.getNumJoints(self.robotUniqueId)):
+    #   print(self._p.getJointInfo(self.robotUniqueId,i))
+    #   print(self._p.getJointState(self.robotUniqueId,i))
       # self._p.changeDynamics(self.robotUniqueId, i, linearDamping=0, angularDamping=0)
     for motor in self.rightWheels:
       self._p.setJointMotorControl2(self.robotUniqueId,
