@@ -2,3 +2,5 @@ pybullet-rl/
 __pycache__
 *.pyc
 *.npy
+scripts/r2d2_heading_stadium1.zip
+scripts/r2d2_heading_stadium.zip

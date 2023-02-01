@@ -15,17 +15,17 @@ import numpy as np
 def main():
 
   env = r2d2GymEnv(renders=False, isDiscrete=False)
-  model = ppo.PPO.load(os.path.join(currentdir,"r2d2_heading"), env=env)
+  model = ppo.PPO.load(os.path.join(currentdir,"r2d2_heading_stadium"), env=env)
 
   obs = env.reset()
-  after_training = os.path.join(currentdir, "videos/after_training.mp4")
+  # after_training = os.path.join(currentdir, "videos/after_training.mp4")
 
   # video = VideoRecorder(env, after_training)
   images = []
   img = model.env.render(mode='rgb_array')
 
 
-  for i in range(1000):
+  for i in range(100):
       action, _states = model.predict(obs, deterministic=True)
       obs, reward, done, info = env.step(action)
       # print("reward is ", reward)
@@ -38,8 +38,8 @@ def main():
 
   env.close()
   # video.close()
-  imageio.mimsave(os.path.join(currentdir,'videos/r2d2_tracker.gif'), [np.array(img) for i, img in enumerate(images) if i%2 == 0], fps=15)
-  np.save(os.path.join(currentdir,'videos/images_arr'),images)
+  imageio.mimsave(os.path.join(currentdir,'videos/r2d2_tracker_stadium.gif'), [np.array(img) for i, img in enumerate(images) if i%2 == 0], fps=8)
+  # np.save(os.path.join(currentdir,'videos/images_arr2'),images)
 
 if __name__ == '__main__':
   main()

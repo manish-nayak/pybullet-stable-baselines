@@ -17,7 +17,7 @@ def main():
 
   model = ppo.PPO("MlpPolicy", env, verbose=1).learn(40000)
   print("############Training completed################")
-  model.save(os.path.join(currentdir,"r2d2_heading"))
+  model.save(os.path.join(currentdir,"r2d2_heading_stadium"))
   obs = env.reset()
   env.close()
 

@@ -68,14 +68,14 @@ class r2d2GymEnv(gym.Env):
     self._p.resetSimulation()
     #self._p.setPhysicsEngineParameter(numSolverIterations=300)
     self._p.setTimeStep(self._timeStep)
-    #self._p.loadURDF(os.path.join(self._urdfRoot,"plane.urdf"))
-    #stadiumobjects = self._p.loadSDF(os.path.join(self._urdfRoot, "stadium.sdf"))
-    plane = self._p.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"))
+    # self._p.loadURDF(os.path.join(self._urdfRoot,"plane.urdf"))
+    stadiumobjects = self._p.loadSDF(os.path.join(self._urdfRoot, "stadium.sdf"))
+    # plane = self._p.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"))
     #move the stadium objects slightly above 0
-    #for i in stadiumobjects:
-    #	pos,orn = self._p.getBasePositionAndOrientation(i)
-    #	newpos = [pos[0],pos[1],pos[2]-0.1]
-    #	self._p.resetBasePositionAndOrientation(i,newpos,orn)
+    for i in stadiumobjects:
+      pos,orn = self._p.getBasePositionAndOrientation(i)
+      newpos = [pos[0],pos[1],pos[2]-0.1]
+      self._p.resetBasePositionAndOrientation(i,newpos,orn)
 
     dist = 5 + 2. * random.random()
     ang = 2. * 3.1415925438 * random.random()
