@@ -1,0 +1,40 @@
+#add parent dir to find package. Only needed for source code build, pip install doesn't need it.
+import os, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(os.path.dirname(currentdir))
+os.sys.path.insert(0, parentdir)
+
+from youbotCamGymEnv import youbotCamGymEnv
+import datetime
+from stable_baselines3 import ppo
+from stable_baselines3.common.env_checker import check_env 
+
+def main():  
+
+  env = youbotCamGymEnv(renders=False, isDiscrete=False)
+# It will check your custom environment and output additional warnings if needed
+  check_env(env)
+
+  model = ppo.PPO("CnnPolicy", env, verbose=1)
+  model.learn(total_timesteps = 50000)
+  print("############Training completed################")
+  model.save(os.path.join(currentdir,"youbot_camera_trajectory"))
+  
+  # del model
+
+  # env = youbotCamGymEnv(renders=True, isDiscrete=False)
+  model = ppo.PPO.load(os.path.join(currentdir,"youbot_camera_trajectory"))
+  # obs = env.reset()
+
+  # for i in range(1000):
+  #     action, _states = model.predict(obs, deterministic=True)
+  #     obs, reward, done, info = env.step(action)
+  #     # print("reward is ", reward)
+  #     env.render(mode='human')
+  #     if done:
+  #       obs = env.reset()
+
+  # env.close()
+
+if __name__ == '__main__':
+  main()

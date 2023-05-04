@@ -124,6 +124,7 @@
       <geometry>
         <mesh filename="meshes/youbot_base/front-left_wheel.dae"/>
       </geometry>
+      <material name="Grey"/>
     </visual>
     <collision>
       <origin rpy="1.570795 0 0" xyz="0 0 0"/>
@@ -164,6 +165,7 @@
       <geometry>
         <mesh filename="meshes/youbot_base/front-right_wheel.dae"/>
       </geometry>
+      <material name="Grey"/>
     </visual>
     <collision>
       <origin rpy="1.570795 0 0" xyz="0 0 0"/>
@@ -205,6 +207,7 @@
       <geometry>
         <mesh filename="meshes/youbot_base/back-left_wheel.dae"/>
       </geometry>
+      <material name="Grey"/>
     </visual>
     <collision>
       <origin rpy="1.570795 0 0" xyz="0 0 0"/>
@@ -245,6 +248,7 @@
       <geometry>
         <mesh filename="meshes/youbot_base/back-right_wheel.dae"/>
       </geometry>
+      <material name="Grey"/>
     </visual>
     <collision>
       <origin rpy="1.570795 0 0" xyz="0 0 0"/>
@@ -711,7 +715,7 @@
   <joint name="camera_joint" type="fixed">
     <parent link="arm_link_4"/>
     <child link="camera_link"/>
-    <origin xyz="0.03                    0.0                    0.06"/>
+    <origin xyz="0.04                    0.0                    0.07"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="camera_link">
@@ -725,7 +729,7 @@
   <joint name="camera_focus_joint" type="fixed">
     <parent link="camera_link"/>
     <child link="camera_focus_link"/>
-    <origin xyz="0.0                    0.0                   0.2"/>
+    <origin xyz="0.0                    0.0                   0.3"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="camera_focus_link">
