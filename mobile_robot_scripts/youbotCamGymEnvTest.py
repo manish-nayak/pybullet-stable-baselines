@@ -33,12 +33,13 @@ def main():
                                         )
     closestPoints = environment._p.getClosestPoints(environment.duckUid, environment._youbot_cam.youbotCamUid, 1000, -1,
                                         environment._youbot_cam.endEffectorId)
-    print("Closest Points for ",len(closestPoints))
-    print(closestPoints[0])
-    print(closestPoints[1])
-    print(closestPoints[2])
-    print(closestPoints[3])
-    print(closestPoints[4])
+    # print("Closest Points for ",len(closestPoints))
+    # print(closestPoints[0])
+    # print(closestPoints[1])
+    # print(closestPoints[2])
+    # print(closestPoints[3])
+    # print(closestPoints[4])
+    print("reward is: ", reward, " and termination is: ", done)
 
 if __name__ == "__main__":
   main()

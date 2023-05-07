@@ -15,7 +15,7 @@ import random
 import pybullet_data
 from pkg_resources import parse_version
 
-maxSteps = 10000
+maxSteps = 1000
 
 RENDER_HEIGHT = 720
 RENDER_WIDTH = 960
@@ -135,12 +135,16 @@ class youbotCamGymEnv(gym.Env):
         if (self.terminated or self._envStepCounter > maxSteps):
             self._observation = self._youbot_cam.getObservation()
             return True
-        maxDist = 0.005
-        closestPoints = p.getClosestPoints(self._youbot_cam.endEffectorId, self.duckUid ,maxDist)
+        maxDist = 0.5
+        closestPoints = p.getClosestPoints(self.duckUid, self._youbot_cam.youbotCamUid, maxDist, -1,
+                                        self._youbot_cam.endEffectorId)
+        closestDist = closestPoints[0][8]
+        minDist = 0.02
 
         currentSelfContact = len( p.getContactPoints(self._youbot_cam.youbotCamUid, self._youbot_cam.youbotCamUid) )
         self.hit = currentSelfContact>self.defaultSelfContact
-        if (len(closestPoints)>0 or currentSelfContact>self.defaultSelfContact):  
+        
+        if (closestDist<minDist or currentSelfContact>self.defaultSelfContact):  
             self.terminated = 1
             print(self.defaultSelfContact, currentSelfContact)
             self._observation = self._youbot_cam.getObservation()                
@@ -162,7 +166,7 @@ class youbotCamGymEnv(gym.Env):
 
         if (numPt > 0):
             reward = -closestPoints[0][8] * 10
-            print("reward: ", reward)
+            # print("reward: ", reward)
 
         
         closest_dist = closestPoints[0][8]
