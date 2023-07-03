@@ -9,6 +9,8 @@ import datetime
 from stable_baselines3 import ppo
 from stable_baselines3.common.env_checker import check_env 
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
+from stable_baselines3.common.callbacks import ProgressBarCallback
+
 
 
 def main():  
@@ -23,10 +25,9 @@ def main():
 
   # Vec Env 
   train_env = SubprocVecEnv(envs)
-  # train_env = SubprocVecEnv([env for i in range(n_procs)], start_method='spawn')
 
   model = ppo.PPO("CnnPolicy", train_env, tensorboard_log="/tmp/ppo/", verbose=1)
-  model.learn(total_timesteps = 50000)
+  model.learn(total_timesteps = 10000, progress_bar=False)
   print("############Training completed################")
   model.save(os.path.join(currentdir,"youbot_camera_trajectory"))
   

@@ -5,6 +5,10 @@ from stable_baselines3.common.policies import ActorCriticCnnPolicy
 import optuna
 from stable_baselines3.common.env_util import make_vec_env
 from youbotCamGymEnv import youbotCamGymEnv
+from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.vec_env import VecMonitor
+from stable_baselines3.common.monitor import Monitor
+
 
 
 n_cpu = 4
@@ -31,9 +35,17 @@ def optimize_agent(trial):
     model_params = optimize_ppo2(trial)
     env = youbotCamGymEnv(renders=False, isDiscrete=False)
 
+    # Separate evaluation env
+    eval_env = youbotCamGymEnv(renders=False, isDiscrete=False)
+    log_dir = "./logs/"
+    eval_env = Monitor(eval_env)
+    # Use deterministic actions for evaluation
+    eval_callback = EvalCallback(eval_env, best_model_save_path=log_dir,
+                                log_path=log_dir, eval_freq=75,
+                                deterministic=True, render=False)
 
     model = PPO(ActorCriticCnnPolicy, env, verbose=0, **model_params)
-    model.learn(10000)
+    model.learn(10000, progress_bar=True, callback=eval_callback)
 
     rewards = []
     n_episodes, reward_sum = 0, 0.0

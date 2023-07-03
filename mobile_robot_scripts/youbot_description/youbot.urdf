@@ -15,7 +15,13 @@
 
   <!-- In order to move the youbot without use wheels-->
   <link name="world" />
-  <link name="virtual_link_xy" />
+  <link name="virtual_link_xy">
+      <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0.0" xyz="0.0 0.0 -0.0"/>
+      <inertia ixx="0.01" ixy="0.000000" ixz="0.000000" iyy="0.01" iyz="0.000000" izz="0.01"/>
+    </inertial>
+   </link>
 
   <joint name="virtual_joint_x" type="prismatic">
     <axis xyz="1 0 0"/>
@@ -24,7 +30,13 @@
     <limit effort="1" lower="-5" upper="5" velocity="1"/>
   </joint>
 
-  <link name="virtual_link_yz" />
+  <link name="virtual_link_yz" >
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0.0" xyz="0.0 0.0 -0.0"/>
+      <inertia ixx="0.01" ixy="0.000000" ixz="0.000000" iyy="0.01" iyz="0.000000" izz="0.01"/>
+    </inertial>
+  </link>
 
   <joint name="virtual_joint_y" type="prismatic">
     <axis xyz="0 1 0"/>
@@ -719,6 +731,11 @@
     <axis xyz="0 0 1"/>
   </joint>
   <link name="camera_link">
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0.1" xyz="0.0 0.0 -0.0"/>
+      <inertia ixx="0.01" ixy="0.000000" ixz="0.000000" iyy="0.01" iyz="0.000000" izz="0.01"/>
+    </inertial>
     <visual>
       <geometry>
         <box size="0.02 0.075 0.02"/>
@@ -733,6 +750,11 @@
     <axis xyz="0 0 1"/>
   </joint>
   <link name="camera_focus_link">
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0.1" xyz="0.0 0.0 -0.0"/>
+      <inertia ixx="0.01" ixy="0.000000" ixz="0.000000" iyy="0.01" iyz="0.000000" izz="0.01"/>
+    </inertial>
   </link>
 
 

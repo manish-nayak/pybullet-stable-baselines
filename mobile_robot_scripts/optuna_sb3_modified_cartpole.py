@@ -1,6 +1,6 @@
 """ Optuna example that optimizes the hyperparameters of
 a reinforcement learning agent using A2C implementation from Stable-Baselines3
-on an OpenAI Gym environment.
+on a Gymnasium environment.
 
 This is a simplified version of what can be found in https://github.com/DLR-RM/rl-baselines3-zoo.
 
@@ -15,14 +15,14 @@ import gym
 import optuna
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
-from stable_baselines3 import PPO
+from stable_baselines3 import A2C
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 import torch
 import torch.nn as nn
-from youbotCamGymEnv import youbotCamGymEnv
 
-
+from cartpole_bullet import CartPoleBulletEnv
+from kukaCamGymEnv_bullet import KukaCamGymEnv
 
 N_TRIALS = 10
 N_STARTUP_TRIALS = 1
@@ -31,12 +31,14 @@ N_TIMESTEPS = int(50)
 EVAL_FREQ = int(N_TIMESTEPS / N_EVALUATIONS)
 N_EVAL_EPISODES = 1
 
-# ENV_ID = "CartPole-v1"
+ENV_ID = "FetchReachDense-v1"
 
 DEFAULT_HYPERPARAMS = {
-    "policy": "CnnPolicy",
-    "env": youbotCamGymEnv(renders=False, isDiscrete=False)
-,
+    "policy": "MlpPolicy",
+    # "env": ENV_ID,
+    "env": CartPoleBulletEnv(renders=False, discrete_actions=False)
+    # "env": KukaCamGymEnv(renders=False, isDiscrete=False)
+
 }
 
 
@@ -46,10 +48,10 @@ def sample_a2c_params(trial: optuna.Trial) -> Dict[str, Any]:
     max_grad_norm = trial.suggest_float("max_grad_norm", 0.3, 5.0, log=True)
     gae_lambda = 1.0 - trial.suggest_float("gae_lambda", 0.001, 0.2, log=True)
     n_steps = 2 ** trial.suggest_int("exponent_n_steps", 3, 5)
-    learning_rate = trial.suggest_float("lr", 1e-5, 1e-3, log=True)
+    learning_rate = trial.suggest_float("lr", 1e-5, 1, log=True)
     ent_coef = trial.suggest_float("ent_coef", 0.00000001, 0.1, log=True)
     ortho_init = trial.suggest_categorical("ortho_init", [False, True])
-    net_arch = trial.suggest_categorical("net_arch", ["small"])
+    net_arch = trial.suggest_categorical("net_arch", ["tiny", "small"])
     activation_fn = trial.suggest_categorical("activation_fn", ["tanh", "relu"])
 
     # Display true values.
@@ -74,7 +76,6 @@ def sample_a2c_params(trial: optuna.Trial) -> Dict[str, Any]:
             "net_arch": net_arch,
             "activation_fn": activation_fn,
             "ortho_init": ortho_init,
-            "normalize_images": False,
         },
     }
 
@@ -87,7 +88,7 @@ class TrialEvalCallback(EvalCallback):
         eval_env: gym.Env,
         trial: optuna.Trial,
         n_eval_episodes: int = 5,
-        eval_freq: int = 100,
+        eval_freq: int = 10000,
         deterministic: bool = True,
         verbose: int = 1,
     ):
@@ -119,11 +120,14 @@ def objective(trial: optuna.Trial) -> float:
     # Sample hyperparameters.
     kwargs.update(sample_a2c_params(trial))
     # Create the RL model.
-    model = PPO(**kwargs)
+    model = A2C(**kwargs)
     # Create env used for evaluation.
     # eval_env = Monitor(gym.make(ENV_ID))
-    eval_env = youbotCamGymEnv(renders=False, isDiscrete=False,)
-    print("----------Eval Env state----------------")
+    # eval_env = youbotCamGymEnv(renders=False, isDiscrete=False,)
+    eval_env = CartPoleBulletEnv(renders=False, discrete_actions=False)
+    # eval_env = KukaCamGymEnv(renders=False, isDiscrete=False)
+
+
     # Create the callback that will periodically evaluate and report the performance.
     eval_callback = TrialEvalCallback(
         eval_env, trial, n_eval_episodes=N_EVAL_EPISODES, eval_freq=EVAL_FREQ, deterministic=True
@@ -139,8 +143,8 @@ def objective(trial: optuna.Trial) -> float:
     finally:
         # Free memory.
         model.env.close()
-        print("Eval Env to be closed next")
-        # eval_env.close()
+        eval_env.close()
+
 
     # Tell the optimizer that the trial failed.
     if nan_encountered:
