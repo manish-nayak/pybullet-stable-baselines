@@ -16,7 +16,7 @@ import pybullet_data
 from pkg_resources import parse_version
 from pybullet_utils import bullet_client as bc
 
-maxSteps = 40
+maxSteps = 500
 
 RENDER_HEIGHT = 720
 RENDER_WIDTH = 960
@@ -83,12 +83,12 @@ class KukaCamGymEnv(gym.Env):
       self._physics_client_id = self._p._client
  
     p = self._p
-    print("Physics Client Id is : ", self._physics_client_id)
+    # print("Physics Client Id is : ", self._physics_client_id)
     p.resetSimulation()
     p.setPhysicsEngineParameter(numSolverIterations=150)
     p.setTimeStep(self._timeStep)
     p.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"), [0, 0, -1])
-    print(os.path.join(self._urdfRoot, "table/table.urdf"))
+    # print(os.path.join(self._urdfRoot, "table/table.urdf"))
     p.loadURDF(os.path.join(self._urdfRoot, "table/table.urdf"), [0.5000000, 0.00000, -.820000],
               [0.000000, 0.000000, 0.0, 1.0])
 
@@ -104,7 +104,7 @@ class KukaCamGymEnv(gym.Env):
     self._envStepCounter = 0
 
     p.stepSimulation()
-    state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
+    # state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
 
     self._observation = self.getExtendedObservation()
     return np.array(self._observation)
@@ -185,8 +185,8 @@ class KukaCamGymEnv(gym.Env):
       p.stepSimulation()
       #self._observation = self.getExtendedObservation()
       self._envStepCounter += 1
-      print("Environment Counter is : ", self._envStepCounter)
-      state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
+      # print("Environment Counter is : ", self._envStepCounter)
+      # state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
       done = self._termination()
       if done:
         break
@@ -213,10 +213,10 @@ class KukaCamGymEnv(gym.Env):
   def _termination(self):
     #print (self._kuka.endEffectorPos[2])
     p = self._p
-    if(self._physics_client_id == 0):
-      print("Client ID is 0 ")
-    elif(self._physics_client_id ==1):
-      print("Client ID is 1 ")
+    # if(self._physics_client_id == 0):
+    #   print("Client ID is 0 ")
+    # elif(self._physics_client_id ==1):
+    #   print("Client ID is 1 ")
     state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
     actualEndEffectorPos = state[0]
 

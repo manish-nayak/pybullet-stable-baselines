@@ -14,7 +14,7 @@ RENDER_WIDTH = 960
 
 class Youbot_Cam:
 
-    def __init__(self, urdfRootPath = pybullet_data.getDataPath(), timeStep=0.01):
+    def __init__(self, urdfRootPath = pybullet_data.getDataPath(), timeStep=0.01, physicsClientId = 0):
         self.urdfRootPath = urdfRootPath
         self.timeStep = timeStep
         self.maxVelocity = 1.0
@@ -30,13 +30,13 @@ class Youbot_Cam:
         self.width = 341
         self.height = 256
 
-        self.reset() #Resetting the Robot
+        self.reset(physicsClientId) #Resetting the Robot
 
-    def reset(self):
+    def reset(self, physicsClientId):
         startPos = [0,0,0]
         startOrientation = p.getQuaternionFromEuler([0,0,0])
         flags = p.URDF_USE_SELF_COLLISION
-        self.youbotCamUid  = p.loadURDF(os.path.join(currentdir, "youbot_description/youbot.urdf"), basePosition=startPos, baseOrientation=startOrientation, flags = flags)
+        self.youbotCamUid  = p.loadURDF(os.path.join(currentdir, "youbot_description/youbot.urdf"), basePosition=startPos, baseOrientation=startOrientation, flags = flags, physicsClientId = physicsClientId)
         self.numJoints = p.getNumJoints(self.youbotCamUid)
 
         self.link_name_to_index = {p.getBodyInfo(self.youbotCamUid)[0].decode('UTF-8'):-1,}

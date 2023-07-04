@@ -10,14 +10,14 @@ from gym import spaces
 from gym.utils import seeding
 import numpy as np
 import time
-import pybullet as p
+import pybullet as p2
 import youbot_camera
 import random
 import pybullet_data
 from pkg_resources import parse_version
 from pybullet_utils import bullet_client as bc
 
-maxSteps = 200
+maxSteps = 1000
 
 RENDER_HEIGHT = 720
 RENDER_WIDTH = 960
@@ -45,28 +45,28 @@ class youbotCamGymEnv(gym.Env):
         self.terminated = 0
         self._physics_client_id = -1
         # self._p = p
-        if self._renders:
-            # self.cid = p.connect(p.SHARED_MEMORY)
-            self._pybullet_client = bc.BulletClient(connection_mode=p.SHARED_MEMORY)
-            # if (self.cid < 0):
-            #     self.cid = p.connect(p.GUI)
-            if (self._pybullet_client < 0):
-                self._pybullet_client = bc.BulletClient(connection_mode = p.GUI)
-            self._pybullet_client.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33])
-        else:
-            # self.cid = p.connect(p.DIRECT)
-            self._pybullet_client = bc.BulletClient(p.DIRECT)
-            print("Client Id during Init - ", self._physics_client_id)
-        #timinglog = p.startStateLogging(p.STATE_LOGGING_PROFILE_TIMINGS, "kukaTimings.json")
-        self._physics_client_id = self._pybullet_client._client
+        # if self._renders:
+        #     # self.cid = p.connect(p.SHARED_MEMORY)
+        #     self._pybullet_client = bc.BulletClient(connection_mode=p.SHARED_MEMORY)
+        #     # if (self.cid < 0):
+        #     #     self.cid = p.connect(p.GUI)
+        #     if (self._pybullet_client < 0):
+        #         self._pybullet_client = bc.BulletClient(connection_mode = p.GUI)
+        #     self._pybullet_client.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33])
+        # else:
+        #     # self.cid = p.connect(p.DIRECT)
+        #     self._pybullet_client = bc.BulletClient(p.DIRECT)
+        #     print("Client Id during Init - ", self._physics_client_id)
+        # #timinglog = p.startStateLogging(p.STATE_LOGGING_PROFILE_TIMINGS, "kukaTimings.json")
+        # self._physics_client_id = self._pybullet_client._client
             
         self.seed()
-        self.reset()
-        observationDim = len(self._youbot_cam.getObservation())
+        # self.reset()
+        # observationDim = len(self._youbot_cam.getObservation())
         #print("observationDim")
         #print(observationDim)
 
-        observation_high = np.array([np.finfo(np.float32).max] * observationDim)
+        # observation_high = np.array([np.finfo(np.float32).max] * observationDim)
         if (self._isDiscrete):
             self.action_space = spaces.Discrete(3)
         else:
@@ -82,64 +82,80 @@ class youbotCamGymEnv(gym.Env):
 
     def reset(self):
         self.terminated = 0
-        print("reset Beginning cid is", self._physics_client_id)
-        self._pybullet_client.resetSimulation()
-        self._pybullet_client.setPhysicsEngineParameter(numSolverIterations=150)
-        self._pybullet_client.setTimeStep(self._timeStep)
+        print("This is where we reset")
+        if self._physics_client_id < 0:
+            if self._renders:
+                self._p = bc.BulletClient(connection_mode=p2.GUI)
+            else:
+                self._p = bc.BulletClient()
+            self._physics_client_id = self._p._client
+        
+        p = self._p
+        p.resetSimulation()
+        p.setPhysicsEngineParameter(numSolverIterations=150)
+        p.setTimeStep(self._timeStep)
 
-        self.planeId = self._pybullet_client.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"))
-        self.tableUid = self._pybullet_client.loadURDF(os.path.join(self._urdfRoot, "table/table.urdf"), basePosition = [0.6,0,0.0], globalScaling = 0.3)
-        self.jengaUid = self._pybullet_client.loadURDF(os.path.join(self._urdfRoot, "jenga/jenga.urdf"),[0.7,0,0.2], globalScaling = 0.6)
-        self._pybullet_client.changeVisualShape(self.jengaUid,-1,rgbaColor=[0.58,0.29,0,1])
+        self.planeId = p.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"))
+        self.tableUid = p.loadURDF(os.path.join(self._urdfRoot, "table/table.urdf"), basePosition = [0.6,0,0.0], globalScaling = 0.3)
+        self.jengaUid = p.loadURDF(os.path.join(self._urdfRoot, "jenga/jenga.urdf"),[0.7,0,0.2], globalScaling = 0.6)
+        p.changeVisualShape(self.jengaUid,-1,rgbaColor=[0.58,0.29,0,1])
         
         xpos = 0.5 + 0.05 * random.random()
         ypos = -0.1 + 0.025 * random.random()
         ang = 3.1415925438 * random.random()
-        orn = self._pybullet_client.getQuaternionFromEuler([0, 0, ang])
+        orn = p.getQuaternionFromEuler([0, 0, ang])
 
-        self.duckUid = self._pybullet_client.loadURDF(os.path.join(self._urdfRoot, "duck_vhacd.urdf"), basePosition = [xpos,ypos,0.2], baseOrientation = orn, globalScaling = 0.75)
-        self._pybullet_client.changeDynamics(self.duckUid,-1,linearDamping=1, angularDamping=1, rollingFriction=0.1, spinningFriction=0.1)
+        self.duckUid = p.loadURDF(os.path.join(self._urdfRoot, "duck_vhacd.urdf"), basePosition = [xpos,ypos,0.2], baseOrientation = orn, globalScaling = 0.75)
+        p.changeDynamics(self.duckUid,-1,linearDamping=1, angularDamping=1, rollingFriction=0.1, spinningFriction=0.1)
 
-        self.mugUid = self._pybullet_client.loadURDF(os.path.join(self._urdfRoot, "objects/mug.urdf"), basePosition = [0.5,0.1,0.2], globalScaling = 0.5)
-        bikeOrn = self._pybullet_client.getQuaternionFromEuler([1.57,0,0])
-        self.bikeUid = self._pybullet_client.loadURDF(os.path.join(self._urdfRoot, "bicycle/bike.urdf"), basePosition = [1, 0.3, 0.1], baseOrientation = bikeOrn, globalScaling = 0.25)
+        self.mugUid = p.loadURDF(os.path.join(self._urdfRoot, "objects/mug.urdf"), basePosition = [0.5,0.1,0.2], globalScaling = 0.5)
+        bikeOrn = p.getQuaternionFromEuler([1.57,0,0])
+        self.bikeUid = p.loadURDF(os.path.join(self._urdfRoot, "bicycle/bike.urdf"), basePosition = [1, 0.3, 0.1], baseOrientation = bikeOrn, globalScaling = 0.25)
 
 
-        self._pybullet_client.setGravity(0, 0, -10)
-        self._youbot_cam = youbot_camera.Youbot_Cam(urdfRootPath=self._urdfRoot, timeStep=self._timeStep)
+        p.setGravity(0, 0, -10)
+        self._youbot_cam = youbot_camera.Youbot_Cam(urdfRootPath=self._urdfRoot, timeStep=self._timeStep, physicsClientId = self._physics_client_id)
         self._envStepCounter = 0
-        self._pybullet_client.stepSimulation()
+        p.stepSimulation()
         self._observation = self._youbot_cam.getObservation()
-        self.defaultSelfContact = len( self._pybullet_client.getContactPoints(self._youbot_cam.youbotCamUid, self._youbot_cam.youbotCamUid) )
+        self.defaultSelfContact = len( p.getContactPoints(self._youbot_cam.youbotCamUid, self._youbot_cam.youbotCamUid) )
 
         return np.array(self._observation)
 
-    def __del__(self):
-        print("Delete function cid - ", self._physics_client_id)
-        connection_state = self._pybullet_client.getConnectionInfo(self._physics_client_id)
-        print("Connection State - ", connection_state)
-        if self._pybullet_client.isConnected(self._physics_client_id):
-            print("Delete the Client")
-            self._pybullet_client.disconnect()
-            # self.cid = -1
-        # p.disconnect()
+    # def __del__(self):
+    #     print("Delete function cid - ", self._physics_client_id)
+    #     connection_state = self._pybullet_client.getConnectionInfo(self._physics_client_id)
+    #     print("Connection State - ", connection_state)
+    #     if self._pybullet_client.isConnected(self._physics_client_id):
+    #         print("Delete the Client")
+    #         self._pybullet_client.disconnect()
+    #         # self.cid = -1
+    #     # p.disconnect()
+
+    def close(self):
+        if self._physics_client_id >= 0:
+            self._p.disconnect()
+        self._physics_client_id = -1
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def step(self, action):
+        p = self._p
         for i in range(self._actionRepeat):
             self._youbot_cam.applyAction(action)
-            self._pybullet_client.stepSimulation()
-            if self._termination():
-                break
+            p.stepSimulation()
             self._envStepCounter += 1
+            done = self._termination()
+            if done:
+                break
+            
         self._observation = self._youbot_cam.getObservation()
         if self._renders:
             time.sleep(self._timeStep)
 
-        done = self._termination()
+        # done = self._termination()
         reward = self._reward()
 
         return np.array(self._observation), reward, done, {}
@@ -153,21 +169,22 @@ class youbotCamGymEnv(gym.Env):
         return self._observation
 
     def _termination(self):
-        state = self._pybullet_client.getLinkState(self._youbot_cam.youbotCamUid, self._youbot_cam.endEffectorId)
+        p = self._p
+        state = p.getLinkState(self._youbot_cam.youbotCamUid, self._youbot_cam.endEffectorId)
         actualEndEffectorPos = state[0]
 
         if (self.terminated or self._envStepCounter > maxSteps):
             self._observation = self._youbot_cam.getObservation()
             return True
         maxDist = 0.5
-        closestPoints = self._pybullet_client.getClosestPoints(self.duckUid, self._youbot_cam.youbotCamUid, maxDist, -1,
+        closestPoints = p.getClosestPoints(self.duckUid, self._youbot_cam.youbotCamUid, maxDist, -1,
                                         self._youbot_cam.endEffectorId)
         closestDist = 100
         if(len(closestPoints)>0):
             closestDist = closestPoints[0][8]
         minDist = 0.02
 
-        currentSelfContact = len( self._pybullet_client.getContactPoints(self._youbot_cam.youbotCamUid, self._youbot_cam.youbotCamUid) )
+        currentSelfContact = len( p.getContactPoints(self._youbot_cam.youbotCamUid, self._youbot_cam.youbotCamUid) )
         self.hit = currentSelfContact>self.defaultSelfContact
         
         if (closestDist<minDist or currentSelfContact>self.defaultSelfContact):  
@@ -179,10 +196,10 @@ class youbotCamGymEnv(gym.Env):
 
 
     def _reward(self):
-
+        p = self._p
         #rewards is height of target object
-        blockPos, blockOrn = self._pybullet_client.getBasePositionAndOrientation(self.duckUid)
-        closestPoints = self._pybullet_client.getClosestPoints(self.duckUid, self._youbot_cam.youbotCamUid, 1000, -1,
+        blockPos, blockOrn = p.getBasePositionAndOrientation(self.duckUid)
+        closestPoints = p.getClosestPoints(self.duckUid, self._youbot_cam.youbotCamUid, 1000, -1,
                                         self._youbot_cam.endEffectorId)
 
         reward = -1000

@@ -24,14 +24,14 @@ import torch.nn as nn
 # from cartpole_bullet import CartPoleBulletEnv
 from kukaCamGymEnv_bullet import KukaCamGymEnv
 
-N_TRIALS = 10
-N_STARTUP_TRIALS = 1
-N_EVALUATIONS = 2
-N_TIMESTEPS = int(50)
+N_TRIALS = 100
+N_STARTUP_TRIALS = 5
+N_EVALUATIONS = 5
+N_TIMESTEPS = int(1200)
 EVAL_FREQ = int(N_TIMESTEPS / N_EVALUATIONS)
 N_EVAL_EPISODES = 2
 
-ENV_ID = "FetchReachDense-v1"
+# ENV_ID = "FetchReachDense-v1"
 
 DEFAULT_HYPERPARAMS = {
     "policy": "CnnPolicy",
@@ -47,7 +47,7 @@ def sample_a2c_params(trial: optuna.Trial) -> Dict[str, Any]:
     gamma = 1.0 - trial.suggest_float("gamma", 0.0001, 0.1, log=True)
     max_grad_norm = trial.suggest_float("max_grad_norm", 0.3, 5.0, log=True)
     gae_lambda = 1.0 - trial.suggest_float("gae_lambda", 0.001, 0.2, log=True)
-    n_steps = 2 ** trial.suggest_int("exponent_n_steps", 3, 5)
+    n_steps = 2 ** trial.suggest_int("exponent_n_steps", 3, 10)
     learning_rate = trial.suggest_float("lr", 1e-5, 1, log=True)
     ent_coef = trial.suggest_float("ent_coef", 0.00000001, 0.1, log=True)
     ortho_init = trial.suggest_categorical("ortho_init", [False, True])
